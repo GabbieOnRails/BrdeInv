@@ -1,0 +1,80 @@
+      "integrity": "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==",
+      "license": "MIT",
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/fuzzysort": {
+      "version": "3.1.0",
+      "resolved": "https://registry.npmjs.org/fuzzysort/-/fuzzysort-3.1.0.tgz",
+      "integrity": "sha512-sR9BNCjBg6LNgwvxlBd0sBABvQitkLzoVY9MYYROQVX/FvfJ4Mai9LsGhDgd8qYdds0bY77VzYd5iuB+v5rwQQ==",
+      "license": "MIT"
+    },
+    "node_modules/gaxios": {
+      "version": "7.1.4",
+      "resolved": "https://registry.npmjs.org/gaxios/-/gaxios-7.1.4.tgz",
+      "integrity": "sha512-bTIgTsM2bWn3XklZISBTQX7ZSddGW+IO3bMdGaemHZ3tbqExMENHLx6kKZ/KlejgrMtj8q7wBItt51yegqalrA==",
+      "license": "Apache-2.0",
+      "dependencies": {
+        "extend": "^3.0.2",
+        "https-proxy-agent": "^7.0.1",
+        "node-fetch": "^3.3.2"
+--
+    "node_modules/node-domexception": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/node-domexception/-/node-domexception-1.0.0.tgz",
+      "integrity": "sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==",
+      "deprecated": "Use your platform's native DOMException instead",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/jimmywarting"
+        },
+        {
+          "type": "github",
+          "url": "https://paypal.me/jimmywarting"
+        }
+      ],
+      "license": "MIT",
+      "engines": {
+        "node": ">=10.5.0"
+      }
+    },
+    "node_modules/node-fetch": {
+      "version": "3.3.2",
+      "resolved": "https://registry.npmjs.org/node-fetch/-/node-fetch-3.3.2.tgz",
+      "integrity": "sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==",
+      "license": "MIT",
+      "dependencies": {
+        "data-uri-to-buffer": "^4.0.0",
+        "fetch-blob": "^3.1.4",
+        "formdata-polyfill": "^4.0.10"
+      },
+      "engines": {
+        "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+      },
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/node-fetch"
+--
+        "@babel/core": "^7.28.0",
+        "@babel/parser": "^7.28.0",
+        "@babel/plugin-transform-typescript": "^7.28.0",
+        "@babel/preset-typescript": "^7.27.1",
+        "@dotenvx/dotenvx": "^1.48.4",
+        "@modelcontextprotocol/sdk": "^1.26.0",
+        "@types/validate-npm-package-name": "^4.0.2",
+        "browserslist": "^4.26.2",
+        "commander": "^14.0.0",
+        "cosmiconfig": "^9.0.0",
+        "dedent": "^1.6.0",
+        "deepmerge": "^4.3.1",
+        "diff": "^8.0.2",
+        "execa": "^9.6.0",
+        "fast-glob": "^3.3.3",
+        "fs-extra": "^11.3.1",
+        "fuzzysort": "^3.1.0",
+        "https-proxy-agent": "^7.0.6",
+        "kleur": "^4.1.5",
+        "msw": "^2.10.4",
+        "node-fetch": "^3.3.2",
