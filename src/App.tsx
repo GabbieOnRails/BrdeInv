@@ -33,7 +33,14 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'create' | 'settings' | 'view'>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
 
-  const login = () => signInWithPopup(auth, googleProvider);
+  const login = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Failed to sign in. Check if your domain is authorized in Firebase.');
+    }
+  };
   const logout = () => signOut(auth);
 
   if (loading) {

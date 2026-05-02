@@ -13,7 +13,7 @@ const config: FirebaseOptions = {
 };
 
 // Check if we have the minimum required config from environment
-const hasEnvConfig = config.apiKey && config.projectId;
+const hasEnvConfig = !!(config.apiKey && config.projectId);
 
 let finalConfig = config;
 let firestoreDatabaseId: string | undefined = import.meta.env.VITE_FIREBASE_DATABASE_ID;
@@ -36,12 +36,20 @@ if (!hasEnvConfig) {
     if (!firestoreDatabaseId) {
       firestoreDatabaseId = data.firestoreDatabaseId;
     }
+    console.log('Firebase: Using local config fallback');
   } catch (e) {
-    console.error('Firebase configuration missing. Please set environment variables or ensure firebase-applet-config.json exists.');
+    console.error('Firebase: Configuration missing! Set environment variables in Vercel.');
   }
+} else {
+  console.log('Firebase: Using environment variables');
 }
 
 const app = initializeApp(finalConfig);
 export const db = getFirestore(app, firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Force account selection to avoid auto-login issues
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
