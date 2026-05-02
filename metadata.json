@@ -1,6 +1,6 @@
 {
-  "name": "Remix: Lumina Invoice",
-  "description": "Professional invoice and receipt generator with cloud storage, AI-powered extraction, and customizable high-end templates.",
+  "name": "Lumina Invoice",
+  "description": "Professional invoice and receipt generator with cloud storage and customizable high-end templates.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
