@@ -331,63 +331,119 @@ export default function InvoiceForm({ user, invoiceId, onClose }: InvoiceFormPro
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[45%] pl-6">Description</TableHead>
-                    <TableHead className="w-[15%]">Qty</TableHead>
-                    <TableHead className="w-[15%] text-right font-mono pr-6">Amount</TableHead>
-                    <TableHead className="w-[10%] text-right pr-6"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {formData.items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="py-4 pl-6">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[45%] pl-6">Description</TableHead>
+                      <TableHead className="w-[15%]">Qty</TableHead>
+                      <TableHead className="w-[15%] text-right font-mono pr-6">Amount</TableHead>
+                      <TableHead className="w-[15%] text-right pr-6">Price</TableHead>
+                      <TableHead className="w-[10%] text-right pr-6"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {formData.items.map((item, index) => (
+                      <TableRow key={index} className="hover:bg-neutral-50/50">
+                        <TableCell className="py-4 pl-6">
+                          <Input 
+                            placeholder="Project consultation" 
+                            value={item.description}
+                            onChange={e => handleItemChange(index, 'description', e.target.value)}
+                            className="rounded-xl border-none shadow-none focus-visible:ring-0 bg-transparent px-0 h-8 font-medium"
+                          />
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Input 
+                            type="number" 
+                            value={item.quantity}
+                            onChange={e => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
+                            className="rounded-xl border-none shadow-none focus-visible:ring-0 bg-transparent px-0 h-8 tabular-nums text-center"
+                          />
+                        </TableCell>
+                        <TableCell className="py-4 text-right pr-6 tabular-nums font-mono font-bold">
+                          {currencySymbol}{(item.total || 0).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="py-4 text-right pr-6">
+                           <Input 
+                             type="number" 
+                             value={item.unitPrice}
+                             onChange={e => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                             className="rounded-xl border-neutral-100 bg-neutral-50 h-8 w-24 text-[10px] text-right font-mono"
+                           />
+                        </TableCell>
+                        <TableCell className="py-4 text-right pr-6">
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => removeItem(index)}
+                            className="rounded-lg text-neutral-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-neutral-100">
+                {formData.items.map((item, index) => (
+                  <div key={index} className="p-4 space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-1.5">
+                        <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest pl-1">Description</Label>
                         <Input 
                           placeholder="Project consultation" 
                           value={item.description}
                           onChange={e => handleItemChange(index, 'description', e.target.value)}
-                          className="rounded-xl border-none shadow-none focus-visible:ring-0 bg-transparent px-0 h-8 font-medium"
+                          className="rounded-xl border-neutral-100 bg-neutral-50 h-10 px-3 text-sm font-medium focus-visible:ring-black shadow-none"
                         />
-                      </TableCell>
-                      <TableCell className="py-4">
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeItem(index)}
+                        className="rounded-xl text-rose-500 bg-rose-50 mt-6 h-10 w-10 shrink-0 shadow-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3 items-end">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest pl-1">Qty</Label>
                         <Input 
                           type="number" 
                           value={item.quantity}
                           onChange={e => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="rounded-xl border-none shadow-none focus-visible:ring-0 bg-transparent px-0 h-8 tabular-nums"
+                          className="rounded-xl border-neutral-100 bg-neutral-50 h-10 px-3 text-center tabular-nums focus-visible:ring-black shadow-none"
                         />
-                      </TableCell>
-                      <TableCell className="py-4 text-right pr-6 tabular-nums font-mono font-bold">
-                        {currencySymbol}{(item.total || 0).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="py-2 text-right pr-4">
-                         <div className="flex flex-col gap-1 items-end">
-                            <span className="text-[10px] text-neutral-400 tabular-nums">Price:</span>
-                            <Input 
-                              type="number" 
-                              value={item.unitPrice}
-                              onChange={e => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                              className="rounded-xl border-neutral-100 bg-neutral-50 h-6 w-20 text-[10px] text-right"
-                            />
-                         </div>
-                      </TableCell>
-                      <TableCell className="py-4 text-right pr-6">
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => removeItem(index)}
-                          className="rounded-lg text-neutral-300 hover:text-rose-500 hover:bg-rose-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest pl-1">Price</Label>
+                        <Input 
+                          type="number" 
+                          value={item.unitPrice}
+                          onChange={e => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          className="rounded-xl border-neutral-100 bg-neutral-50 h-10 px-3 text-right tabular-nums focus-visible:ring-black shadow-none"
+                        />
+                      </div>
+                      <div className="text-right pb-1.5">
+                        <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1.5">Total</Label>
+                        <div className="text-sm font-bold text-neutral-900 tabular-nums">
+                          {currencySymbol}{(item.total || 0).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 

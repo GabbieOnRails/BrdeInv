@@ -15,7 +15,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  FileSearch
+  FileSearch,
+  Layout
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -85,12 +86,12 @@ export default function App() {
       <Toaster position="top-center" />
       
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-bottom border-neutral-200 px-6 py-4 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-200 px-4 md:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveTab('dashboard'); setSelectedInvoiceId(null); }}>
           <div className="p-2 bg-black rounded-lg">
-            <FileText className="w-6 h-6 text-white" />
+            <FileText className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Lumina</span>
+          <span className="text-lg md:text-xl font-bold tracking-tight">Lumina</span>
         </div>
 
         <div className="hidden md:flex items-center gap-1 bg-neutral-100 p-1 rounded-xl">
@@ -112,19 +113,19 @@ export default function App() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button onClick={() => setActiveTab('create')} size="sm" className="hidden sm:flex gap-2 rounded-xl bg-black hover:bg-neutral-800">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button onClick={() => setActiveTab('create')} size="sm" className="hidden md:flex gap-2 rounded-xl bg-black hover:bg-neutral-800">
             <Plus className="w-4 h-4" /> New Invoice
           </Button>
-          <div className="h-8 w-[1px] bg-neutral-200 mx-1 hidden sm:block" />
-          <Button variant="ghost" size="icon" onClick={logout} className="rounded-xl">
-            <LogOut className="w-5 h-5" />
+          <div className="h-8 w-[1px] bg-neutral-200 mx-1 hidden md:block" />
+          <Button variant="ghost" size="icon" onClick={logout} className="rounded-xl h-9 w-9 md:h-10 md:w-10">
+            <LogOut className="w-4 h-4 md:w-5 md:h-5 text-neutral-600" />
           </Button>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 pb-24 md:pb-6">
         <AnimatePresence mode="wait">
           {activeTab === 'dashboard' && (
             <motion.div
@@ -183,6 +184,36 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 bg-white/80 backdrop-blur-xl border border-neutral-200 p-1.5 rounded-2xl shadow-2xl ring-1 ring-black/5">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setActiveTab('dashboard')}
+          className={`h-12 w-12 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-neutral-500 hover:bg-neutral-100'}`}
+        >
+          <Layout className="w-5 h-5" />
+        </Button>
+        <div className="w-[1px] h-6 bg-neutral-200 mx-1" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setActiveTab('create')}
+          className={`h-12 w-12 rounded-xl transition-all ${activeTab === 'create' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-neutral-500 hover:bg-neutral-100'}`}
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+        <div className="w-[1px] h-6 bg-neutral-200 mx-1" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setActiveTab('settings')}
+          className={`h-12 w-12 rounded-xl transition-all ${activeTab === 'settings' ? 'bg-white shadow-md ring-1 ring-neutral-200' : 'text-neutral-500 hover:bg-neutral-100'}`}
+        >
+          <Settings className="w-5 h-5" />
+        </Button>
+      </div>
     </div>
   );
 }

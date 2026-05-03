@@ -259,17 +259,17 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 md:gap-3">
           {!isPreview && invoice.id && invoice.status !== 'paid' && (
             <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
               <DialogTrigger
                 render={
-                  <Button variant="outline" className="rounded-xl gap-2 border-neutral-200 text-neutral-600">
-                    <CreditCard className="w-4 h-4" /> Record Payment
+                  <Button variant="outline" className="rounded-xl gap-2 border-neutral-200 text-neutral-600 h-10 md:h-12 px-4 md:px-6">
+                    <CreditCard className="w-4 h-4" /> <span className="hidden sm:inline">Record Payment</span><span className="sm:hidden">Pay</span>
                   </Button>
                 }
               />
-              <DialogContent className="rounded-3xl">
+              <DialogContent className="rounded-3xl w-[95vw] max-w-lg p-4 md:p-6">
                 <DialogHeader>
                   <DialogTitle>Record Payment</DialogTitle>
                   <DialogDescription>
@@ -284,14 +284,14 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
                       placeholder="0.00" 
                       value={paymentAmount}
                       onChange={e => setPaymentAmount(e.target.value)}
-                      className="rounded-xl"
+                      className="rounded-xl h-12"
                     />
-                    <p className="text-[10px] text-neutral-500">Remaining balance: {currencySymbol}{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}</p>
+                    <p className="text-[10px] text-neutral-500 font-medium">Remaining balance: {currencySymbol}{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}</p>
                   </div>
                   <div className="space-y-2">
                     <Label>Payment Method</Label>
                     <select 
-                      className="w-full flex h-10 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-black outline-none"
+                      className="w-full flex h-12 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-black outline-none"
                       value={paymentMethod}
                       onChange={e => setPaymentMethod(e.target.value as any)}
                     >
@@ -307,23 +307,23 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
                       placeholder="Payment reference" 
                       value={paymentNotes}
                       onChange={e => setPaymentNotes(e.target.value)}
-                      className="rounded-xl"
+                      className="rounded-xl h-12"
                     />
                   </div>
                 </div>
-                <DialogFooter className="flex-col sm:flex-row gap-2">
+                <DialogFooter className="flex flex-col sm:flex-row gap-2">
                   <Button 
                     variant="outline" 
                     onClick={() => handleRecordPayment(true)} 
                     disabled={isSubmittingPayment}
-                    className="flex-1 rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300"
+                    className="w-full sm:flex-1 rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 h-12"
                   >
                     {isSubmittingPayment ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <CheckCircle2 className="w-3 h-3 mr-2" />}
                     Settled in Full
                   </Button>
-                  <Button onClick={() => handleRecordPayment()} disabled={isSubmittingPayment || !paymentAmount} className="flex-1 rounded-xl bg-black">
+                  <Button onClick={() => handleRecordPayment()} disabled={isSubmittingPayment || !paymentAmount} className="w-full sm:flex-1 rounded-xl bg-black h-12">
                     {isSubmittingPayment ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                    Record Payment
+                    Add Payment
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -332,24 +332,24 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
           <Button 
             variant="outline" 
             size={isPreview ? "icon" : "default"}
-            className="rounded-xl gap-2 border-neutral-200" 
+            className="rounded-xl gap-2 border-neutral-200 h-10 md:h-12 px-4 md:px-6" 
             onClick={handleDownloadPDF}
             disabled={exporting}
             title="Export PDF"
           >
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {!isPreview && (exporting ? 'Exporting...' : 'Export PDF')}
+            {!isPreview && (exporting ? 'Exporting...' : <><span className="hidden sm:inline">Export PDF</span><span className="sm:hidden">PDF</span></>)}
           </Button>
           {!isPreview && (
             <>
-              <Button variant="ghost" className="rounded-xl gap-2 text-neutral-500" onClick={handlePrint}>
+              <Button variant="ghost" className="rounded-xl gap-2 text-neutral-500 h-10 md:h-12 px-4 md:px-6 hidden sm:flex" onClick={handlePrint}>
                 <Printer className="w-4 h-4" /> Print
               </Button>
               <Button 
                 onClick={handleSendEmail}
-                className="rounded-xl bg-black hover:bg-neutral-800 shadow-lg shadow-black/10 gap-2 cursor-pointer"
+                className="rounded-xl bg-black hover:bg-neutral-800 shadow-lg shadow-black/10 gap-2 h-10 md:h-12 px-4 md:px-6"
               >
-                <Mail className="w-4 h-4" /> Send Email
+                <Mail className="w-4 h-4" /> <span className="hidden sm:inline">Send Email</span><span className="sm:hidden">Send</span>
               </Button>
             </>
           )}

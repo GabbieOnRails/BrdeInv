@@ -102,45 +102,45 @@ export default function SettingsPage({ user }: SettingsProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 font-sans space-y-10">
+    <div className="max-w-4xl mx-auto py-6 md:py-10 px-4 font-sans space-y-8 md:space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black tracking-tight italic uppercase">Settings</h1>
-          <p className="text-neutral-500 font-medium tracking-wide">Configure your business identity and billing defaults.</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight italic uppercase">Settings</h1>
+          <p className="text-neutral-500 font-medium tracking-wide text-sm md:text-base">Configure your business identity and billing defaults.</p>
         </div>
         <Button 
           onClick={handleSave} 
           disabled={saving}
-          className="rounded-2xl bg-black hover:bg-neutral-800 h-14 px-8 text-lg font-bold shadow-2xl shadow-black/20 gap-3"
+          className="rounded-2xl bg-black hover:bg-neutral-800 h-14 px-8 text-lg font-bold shadow-2xl shadow-black/20 gap-3 w-full md:w-auto"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-          Save All Changes
+          Save Changes
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Identities */}
         <div className="lg:col-span-12">
-          <Card className="rounded-[40px] border-neutral-200 overflow-hidden shadow-sm">
-            <CardHeader className="bg-neutral-50 p-8 border-b border-neutral-100">
-              <div className="flex justify-between items-start">
+          <Card className="rounded-[32px] md:rounded-[40px] border-neutral-200 overflow-hidden shadow-sm">
+            <CardHeader className="bg-neutral-50 p-6 md:p-8 border-b border-neutral-100">
+              <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                 <div>
-                  <CardTitle className="text-2xl font-bold tracking-tight">Business Identity</CardTitle>
+                  <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">Business Identity</CardTitle>
                   <CardDescription className="text-neutral-500 mt-1">This branding will be used throughout Lumina and on all generated documents.</CardDescription>
                 </div>
-                <div className="p-3 bg-white rounded-2xl border border-neutral-100 shadow-sm">
+                <div className="p-3 bg-white rounded-2xl border border-neutral-100 shadow-sm shrink-0">
                   <Building className="w-6 h-6 text-black" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8 space-y-10">
-              <div className="flex flex-col md:flex-row gap-10">
+            <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
+              <div className="flex flex-col md:flex-row gap-8 md:gap-10">
                 {/* Logo Section */}
-                <div className="space-y-4">
-                  <Label className="text-xs font-black uppercase tracking-widest text-neutral-400">Business Logo</Label>
+                <div className="space-y-4 flex flex-col items-center md:items-start shrink-0">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Business Logo</Label>
                   <div className="relative group">
                     {logoPreview ? (
-                      <div className="relative w-40 h-40 bg-white border-2 border-neutral-100 rounded-[32px] overflow-hidden flex items-center justify-center p-4">
+                      <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white border-2 border-neutral-100 rounded-[32px] overflow-hidden flex items-center justify-center p-4">
                         <img src={logoPreview} alt="Logo Preview" className="max-w-full max-h-full object-contain" referrerPolicy="no-referrer" />
                         <button 
                           onClick={removeLogo}
@@ -150,19 +150,19 @@ export default function SettingsPage({ user }: SettingsProps) {
                         </button>
                       </div>
                     ) : (
-                      <Label htmlFor="logo-upload" className="cursor-pointer flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-neutral-200 rounded-[32px] hover:border-black hover:bg-neutral-50 transition-all group">
-                        <Upload className="w-8 h-8 text-neutral-300 group-hover:text-black mb-2" />
+                      <Label htmlFor="logo-upload" className="cursor-pointer flex flex-col items-center justify-center w-32 h-32 md:w-40 md:h-40 border-2 border-dashed border-neutral-200 rounded-[32px] hover:border-black hover:bg-neutral-50 transition-all group">
+                        <Upload className="w-6 h-6 md:w-8 md:h-8 text-neutral-300 group-hover:text-black mb-2" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 group-hover:text-black">Upload</span>
                         <input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                       </Label>
                     )}
                   </div>
-                  <p className="text-[10px] text-neutral-400 font-medium max-w-[160px] text-center italic">Best on white or transparent background.</p>
+                  <p className="text-[10px] text-neutral-400 font-medium max-w-[160px] text-center md:text-left italic">Best on white/transparent.</p>
                 </div>
 
                 {/* Main Fields */}
                 <div className="flex-1 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-2">
                       <Label className="text-xs font-black uppercase tracking-widest text-neutral-400">Company Name</Label>
                       <Input 

@@ -167,7 +167,7 @@ export default function Dashboard({ user, onEdit, onView }: DashboardProps) {
         </Card>
       </div>
 
-      {/* Invoice Table */}
+      {/* Invoice Table / Mobile Cards */}
       <Card className="rounded-3xl border-neutral-200 shadow-sm overflow-hidden">
         <div className="p-6 flex items-center justify-between border-b border-neutral-100">
           <CardTitle className="text-lg">Recent Invoices</CardTitle>
@@ -185,82 +185,141 @@ export default function Dashboard({ user, onEdit, onView }: DashboardProps) {
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-neutral-50 hover:bg-neutral-50">
-                  <TableHead className="py-4 px-6 font-semibold text-neutral-900">Invoice</TableHead>
-                  <TableHead className="py-4 px-6 font-semibold text-neutral-900">Template</TableHead>
-                  <TableHead className="py-4 px-6 font-semibold text-neutral-900">Customer</TableHead>
-                  <TableHead className="py-4 px-6 font-semibold text-neutral-900">Date</TableHead>
-                  <TableHead className="py-4 px-6 font-semibold text-neutral-900">Amount</TableHead>
-                  <TableHead className="py-4 px-6 font-semibold text-neutral-900">Status</TableHead>
-                  <TableHead className="py-4 px-6 text-right font-semibold text-neutral-900">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-neutral-50 hover:bg-neutral-50">
+                      <TableHead className="py-4 px-6 font-semibold text-neutral-900">Invoice</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-neutral-900">Template</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-neutral-900">Customer</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-neutral-900">Date</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-neutral-900">Amount</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-neutral-900">Status</TableHead>
+                      <TableHead className="py-4 px-6 text-right font-semibold text-neutral-900">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredInvoices.map((inv) => (
+                      <TableRow key={inv.id} className="hover:bg-neutral-50 transition-colors group">
+                        <TableCell className="py-4 px-6 font-medium">#{inv.invoiceNumber}</TableCell>
+                        <TableCell className="py-4 px-6">
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                               const tmpl = INVOICE_TEMPLATES.find(t => t.id === inv.templateId) || INVOICE_TEMPLATES[0];
+                               const Icon = tmpl.icon;
+                               return <Icon className="w-3.5 h-3.5 text-neutral-400" />;
+                            })()}
+                            <span className="text-xs font-medium text-neutral-600">
+                              {INVOICE_TEMPLATES.find(t => t.id === inv.templateId)?.name || 'Modern'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-6">
+                          <div className="flex flex-col">
+                            <span className="font-medium">{inv.customerName}</span>
+                            <span className="text-xs text-neutral-500">{inv.customerEmail}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-6 text-neutral-600">
+                          {format(toDate(inv.date), 'MMM dd, yyyy')}
+                        </TableCell>
+                        <TableCell className="py-4 px-6 font-bold text-neutral-900">
+                          {currencySymbol}{inv.totalAmount.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="py-4 px-6">{getStatusBadge(inv.status)}</TableCell>
+                        <TableCell className="py-4 px-6 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => onView(inv.id!)}
+                              className="rounded-lg hover:bg-black hover:text-white transition-all"
+                              title="View & Export PDF"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => onEdit(inv.id!)}
+                              className="rounded-lg hover:bg-black hover:text-white transition-all"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile List View */}
+              <div className="md:hidden divide-y divide-neutral-100">
                 {filteredInvoices.map((inv) => (
-                  <TableRow key={inv.id} className="hover:bg-neutral-50 transition-colors group">
-                    <TableCell className="py-4 px-6 font-medium">#{inv.invoiceNumber}</TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="flex items-center gap-2">
+                  <div key={inv.id} className="p-4 space-y-4 hover:bg-neutral-50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-neutral-900">#{inv.invoiceNumber}</span>
+                          {getStatusBadge(inv.status)}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-neutral-900">{inv.customerName}</span>
+                          <span className="text-xs text-neutral-500">{inv.customerEmail}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-neutral-900">
+                          {currencySymbol}{inv.totalAmount.toLocaleString()}
+                        </div>
+                        <div className="text-[10px] text-neutral-400">
+                          {format(toDate(inv.date), 'MMM dd, yyyy')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center gap-1.5">
                         {(() => {
                            const tmpl = INVOICE_TEMPLATES.find(t => t.id === inv.templateId) || INVOICE_TEMPLATES[0];
                            const Icon = tmpl.icon;
-                           return <Icon className="w-3.5 h-3.5 text-neutral-400" />;
+                           return (
+                             <div className="flex items-center gap-1.5 py-1 px-2 bg-neutral-100 rounded-md">
+                               <Icon className="w-3 h-3 text-neutral-500" />
+                               <span className="text-[10px] font-semibold text-neutral-600 uppercase tracking-wider">
+                                 {INVOICE_TEMPLATES.find(t => t.id === inv.templateId)?.name || 'Modern'}
+                               </span>
+                             </div>
+                           );
                         })()}
-                        <span className="text-xs font-medium text-neutral-600">
-                          {INVOICE_TEMPLATES.find(t => t.id === inv.templateId)?.name || 'Modern'}
-                        </span>
                       </div>
-                    </TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{inv.customerName}</span>
-                        <span className="text-xs text-neutral-500">{inv.customerEmail}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4 px-6 text-neutral-600">
-                      {format(toDate(inv.date), 'MMM dd, yyyy')}
-                    </TableCell>
-                    <TableCell className="py-4 px-6 font-bold text-neutral-900">
-                      {currencySymbol}{inv.totalAmount.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="py-4 px-6">{getStatusBadge(inv.status)}</TableCell>
-                    <TableCell className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex items-center gap-1">
                         <Button 
-                          variant="ghost" 
-                          size="icon" 
+                          variant="outline" 
+                          size="sm"
                           onClick={() => onView(inv.id!)}
-                          className="rounded-lg hover:bg-black hover:text-white transition-all"
-                          title="View & Export PDF"
+                          className="h-9 px-4 rounded-xl gap-2 font-medium"
                         >
-                          <Download className="w-4 h-4" />
+                          <Eye className="w-4 h-4" /> View
                         </Button>
                         <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => onView(inv.id!)}
-                          className="rounded-lg hover:bg-black hover:text-white transition-all flex md:hidden"
-                          title="Quick View"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                          variant="outline" 
+                          size="sm"
                           onClick={() => onEdit(inv.id!)}
-                          className="rounded-lg hover:bg-black hover:text-white transition-all"
-                          title="Edit"
+                          className="h-9 px-4 rounded-xl gap-2 font-medium"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-4 h-4" /> Edit
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
