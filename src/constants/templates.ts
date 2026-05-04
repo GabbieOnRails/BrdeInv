@@ -6,9 +6,10 @@ export interface InvoiceTemplate {
   name: string;
   description: string;
   icon: LucideIcon;
-  variant: 'modern' | 'classic' | 'minimal' | 'bold';
+  variant: 'modern' | 'classic' | 'minimal' | 'bold' | 'executive';
   theme: {
     primary: string;
+    secondary?: string;
     accent: string;
     fontFamily: string;
     borderRadius: string;
@@ -16,6 +17,20 @@ export interface InvoiceTemplate {
 }
 
 export const INVOICE_TEMPLATES: InvoiceTemplate[] = [
+  {
+    id: 'executive_gold',
+    name: 'Executive Gold',
+    description: 'A premium, professional layout with navy bars, gold accents, and detailed column spacing.',
+    icon: Palette,
+    variant: 'executive',
+    theme: {
+      primary: '#002147', // Deep Navy
+      secondary: '#B8860B', // Dark Goldenrod/Gold
+      accent: '#F9F9F9',
+      fontFamily: 'font-sans',
+      borderRadius: 'radius-none',
+    }
+  },
   {
     id: 'modern',
     name: 'Modern Tech',

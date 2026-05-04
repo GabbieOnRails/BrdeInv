@@ -3,7 +3,7 @@ import { User } from 'firebase/auth';
 import { Invoice, invoiceService, UserProfile, userService } from '@/services/invoiceService';
 import { getCurrencySymbol, toDate } from '@/lib/utils';
 import { INVOICE_TEMPLATES } from '@/constants/templates';
-import { toPng } from 'html-to-image';
+import { toPng, toJpeg } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { 
@@ -25,7 +25,12 @@ import {
   AlertCircle,
   History,
   DollarSign,
-  Wallet
+  Wallet,
+  Globe,
+  Building2,
+  Landmark,
+  FileEdit,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
@@ -152,6 +157,36 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
     }
   };
 
+  const handleDownloadJPEG = async () => {
+    if (!templateRef.current || !invoice) return;
+    
+    setExporting(true);
+    const loadingToast = toast.loading('Generating high-quality JPEG...');
+    
+    try {
+      const element = templateRef.current;
+      
+      const dataUrl = await toJpeg(element, {
+        quality: 0.95,
+        pixelRatio: 3,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+      });
+
+      const link = document.createElement('a');
+      link.download = `Invoice_${invoice.invoiceNumber || 'draft'}.jpg`;
+      link.href = dataUrl;
+      link.click();
+      
+      toast.success('JPEG exported successfully', { id: loadingToast });
+    } catch (err) {
+      console.error('JPEG Export Error:', err);
+      toast.error('JPEG Export failed.', { id: loadingToast });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const handleSendEmail = () => {
     if (!invoice) return;
     
@@ -221,6 +256,8 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
         return <StudioDarkTemplate invoice={invoice} profile={profile} currencySymbol={currencySymbol} />;
       case 'pro_dark':
         return <ProDarkTemplate invoice={invoice} profile={profile} currencySymbol={currencySymbol} />;
+      case 'executive_gold':
+        return <ExecutiveGoldTemplate invoice={invoice} profile={profile} currencySymbol={currencySymbol} />;
       default:
         switch (currentTemplate.variant) {
           case 'minimal':
@@ -340,6 +377,20 @@ export default function InvoiceView({ user, invoiceId, invoiceObject, onClose, i
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             {!isPreview && (exporting ? 'Exporting...' : <><span className="hidden sm:inline">Export PDF</span><span className="sm:hidden">PDF</span></>)}
           </Button>
+
+          {!isPreview && (
+            <Button 
+              variant="outline" 
+              className="rounded-xl gap-2 border-neutral-200 h-10 md:h-12 px-4 md:px-6" 
+              onClick={handleDownloadJPEG}
+              disabled={exporting}
+              title="Export JPEG"
+            >
+              {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              <span className="hidden sm:inline">Export JPEG</span><span className="sm:hidden">JPEG</span>
+            </Button>
+          )}
+
           {!isPreview && (
             <>
               <Button variant="ghost" className="rounded-xl gap-2 text-neutral-500 h-10 md:h-12 px-4 md:px-6 hidden sm:flex" onClick={handlePrint}>
@@ -513,7 +564,7 @@ function ModernTemplate({ invoice, profile, currencySymbol }: { invoice: Invoice
         </div>
 
         <div className="text-left md:text-right space-y-4">
-          <h1 className="hidden md:block text-6xl font-black uppercase italic tracking-tighter text-neutral-100 absolute right-12 top-12 -z-10 select-none">{invoice.type}</h1>
+          <h1 className="hidden md:block text-6xl font-black uppercase italic tracking-tighter text-neutral-100 absolute right-12 top-12 -z-10 select-none">{invoice.status === 'paid' ? 'RECEIPT' : invoice.type.toUpperCase()}</h1>
           <div className="pt-0 md:pt-8 space-y-1">
             <p className="text-neutral-400 text-xs font-bold uppercase tracking-widest">Bill To</p>
             <p className="font-bold text-lg text-neutral-900 break-words">{invoice.customerName || 'Customer Name'}</p>
@@ -527,7 +578,7 @@ function ModernTemplate({ invoice, profile, currencySymbol }: { invoice: Invoice
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-12 border-b border-neutral-100">
         <div className="space-y-1">
-          <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">Invoice Number</p>
+          <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">{invoice.status === 'paid' ? 'Receipt' : 'Invoice'} Number</p>
           <p className="font-bold text-neutral-900">#{invoice.invoiceNumber || '---'}</p>
         </div>
         <div className="space-y-1">
@@ -599,7 +650,7 @@ function ModernTemplate({ invoice, profile, currencySymbol }: { invoice: Invoice
               </span>
               <span className="text-4xl font-black tracking-tighter text-neutral-900 italic">
                 <span className="text-sm not-italic align-top mr-1">{currencySymbol}</span>
-                {(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
+                {invoice.status === 'paid' ? invoice.totalAmount.toLocaleString() : (invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
               </span>
             </div>
           </div>
@@ -615,7 +666,7 @@ function MinimalTemplate({ invoice, profile, currencySymbol }: { invoice: Invoic
       <div className="flex flex-col md:flex-row justify-between items-start gap-8">
         <LogoArea profile={profile} minimal />
         <div className="text-left md:text-right space-y-4 md:space-y-8">
-          <p className="text-4xl md:text-5xl font-light text-neutral-200 tracking-tight capitalize">{invoice.type}</p>
+          <p className="text-4xl md:text-5xl font-light text-neutral-200 tracking-tight capitalize">{invoice.status === 'paid' ? 'Receipt' : invoice.type}</p>
           <div className="space-y-1">
             <p className="text-xs text-neutral-400 uppercase tracking-widest font-medium">From</p>
             <p className="font-medium text-neutral-900 break-words">{profile?.businessName || 'Lumina Enterprise'}</p>
@@ -688,7 +739,7 @@ function MinimalTemplate({ invoice, profile, currencySymbol }: { invoice: Invoic
         </div>
       </div>
       <div className="text-center pt-24 text-[10px] text-neutral-300 uppercase tracking-[0.2em]">
-        Lumina Invoice • Minimal Edition
+        Lumina {invoice.status === 'paid' ? 'Receipt' : 'Invoice'} • Minimal Edition
       </div>
     </div>
   );
@@ -700,15 +751,19 @@ function BoldTemplate({ invoice, profile, currencySymbol }: { invoice: Invoice, 
       <div className="bg-black p-12 md:p-16 text-white flex flex-col md:flex-row justify-between gap-12 items-center">
         <div className="space-y-4 text-center md:text-left">
           <LogoArea profile={profile} />
-          <h1 className="text-5xl font-black italic tracking-tighter uppercase">{invoice.type}</h1>
-          <p className="text-neutral-400 font-bold tracking-widest uppercase text-xs">#{invoice.invoiceNumber || '---'}</p>
+          <h1 className="text-5xl font-black italic tracking-tighter uppercase">{invoice.status === 'paid' ? 'RECEIPT' : invoice.type}</h1>
+          <p className="text-neutral-400 font-bold tracking-widest uppercase text-xs">{invoice.status === 'paid' ? 'Receipt' : 'Invoice'} #{invoice.invoiceNumber || '---'}</p>
         </div>
         <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-center space-y-2 min-w-[200px]">
-          <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">Amount Due</p>
+          <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">
+            {invoice.status === 'paid' ? 'Amount Paid' : 'Amount Due'}
+          </p>
           <p className="text-5xl font-black tracking-tighter italic tabular-nums">{currencySymbol}{invoice.totalAmount.toLocaleString()}</p>
-          <div className="px-3 py-1 bg-white text-black rounded-full inline-block text-[10px] font-bold uppercase tracking-wider shadow-xl">
-            Due {format(toDate(invoice.dueDate), 'MMM dd')}
-          </div>
+          {invoice.status !== 'paid' && (
+            <div className="px-3 py-1 bg-white text-black rounded-full inline-block text-[10px] font-bold uppercase tracking-wider shadow-xl">
+              Due {format(toDate(invoice.dueDate), 'MMM dd')}
+            </div>
+          )}
         </div>
       </div>
       
@@ -790,14 +845,14 @@ function StudioLightTemplate({ invoice, profile, currencySymbol }: { invoice: In
         </div>
         <div className="text-left md:text-right">
           <p className="text-xs font-black uppercase tracking-widest text-neutral-400">Professional Services</p>
-          <p className="font-bold text-neutral-900 break-all capitalize">{invoice.type} {invoice.invoiceNumber}</p>
+          <p className="font-bold text-neutral-900 break-all capitalize">{invoice.status === 'paid' ? 'Receipt' : invoice.type} {invoice.invoiceNumber}</p>
         </div>
       </div>
 
       <div className="absolute top-32 -right-8 w-16 h-16 bg-green-200/50 rounded-lg -rotate-12 hidden md:block" />
       <div className="absolute top-40 -right-4 w-16 h-16 bg-green-300/30 rounded-lg hidden md:block" />
 
-      <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-neutral-900">INVOICE</h1>
+      <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-neutral-900">{invoice.status === 'paid' ? 'RECEIPT' : 'INVOICE'}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 py-8 border-t border-neutral-100">
         <div className="space-y-1">
@@ -806,7 +861,7 @@ function StudioLightTemplate({ invoice, profile, currencySymbol }: { invoice: In
           <p className="text-sm text-neutral-500 italic break-words">{invoice.customerEmail} • {invoice.customerAddress}</p>
         </div>
         <div className="text-left md:text-right self-end">
-           <p className="text-xs font-black uppercase tracking-widest text-violet-600 mb-2">Invoice Details</p>
+           <p className="text-xs font-black uppercase tracking-widest text-violet-600 mb-2">{invoice.status === 'paid' ? 'Receipt' : 'Invoice'} Details</p>
         </div>
       </div>
 
@@ -854,7 +909,7 @@ function StudioLightTemplate({ invoice, profile, currencySymbol }: { invoice: In
                 {invoice.status === 'paid' ? 'Total Paid' : 'Total Due'}
               </span>
               <span className="text-3xl font-black italic tabular-nums">
-                {currencySymbol}{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
+                {currencySymbol}{invoice.status === 'paid' ? invoice.totalAmount.toLocaleString() : (invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
               </span>
             </div>
           </div>
@@ -895,7 +950,7 @@ function LiceriaPurpleTemplate({ invoice, profile, currencySymbol }: { invoice: 
             <p className="text-3xl md:text-4xl font-black tracking-tighter uppercase leading-none break-words">
               {(profile?.businessName || 'Lumina Studio')?.split(' ').map((word: string, i: number) => (
                 <span key={i} className="block">{word}</span>
-              ))} TAX {invoice.type.toUpperCase()}
+              ))} {invoice.status === 'paid' ? 'RECEIPT' : `TAX ${invoice.type.toUpperCase()}`}
             </p>
           </div>
           <div className="text-right">
@@ -908,7 +963,7 @@ function LiceriaPurpleTemplate({ invoice, profile, currencySymbol }: { invoice: 
             <p className="text-neutral-900 mt-1 break-all">{profile?.accountNumber || '---'}</p>
           </div>
           <div className="text-right">
-            <p>Tax Invoice #</p>
+            <p>{invoice.status === 'paid' ? 'Receipt #' : 'Tax Invoice #'}</p>
             <p className="text-neutral-900 mt-1 break-all">{invoice.invoiceNumber}</p>
           </div>
         </div>
@@ -985,7 +1040,7 @@ function LiceriaPurpleTemplate({ invoice, profile, currencySymbol }: { invoice: 
                 </span>
                 <div className="flex gap-4 tabular-nums font-black italic">
                   <span>{currencySymbol}</span>
-                  <span>{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}</span>
+                  <span>{invoice.status === 'paid' ? invoice.totalAmount.toLocaleString() : (invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -1031,14 +1086,14 @@ function StudioDarkTemplate({ invoice, profile, currencySymbol }: { invoice: Inv
            <span className="text-xl md:text-2xl font-bold tracking-tight break-words">{profile?.businessName || 'Lumina Creative'}</span>
         </div>
         <div className="text-center md:text-right">
-          <p className="text-2xl md:text-3xl font-bold tracking-tighter truncate max-w-[200px] md:max-w-none capitalize">{invoice.type} Partner</p>
+          <p className="text-2xl md:text-3xl font-bold tracking-tighter truncate max-w-[200px] md:max-w-none capitalize">{invoice.status === 'paid' ? 'Receipt' : invoice.type} Partner</p>
           <p className="text-[10px] md:text-xs text-neutral-400 break-words">{profile?.businessAddress?.split('\n')[0]}</p>
           <p className="text-[10px] md:text-xs text-neutral-400">{profile?.businessPhone}</p>
         </div>
       </div>
 
       <div className="bg-[#eee8dd] p-6 md:p-12 -mt-4 rounded-[40px] md:rounded-[60px] rounded-tr-none min-h-[800px] shadow-2xl space-y-12 md:space-y-16">
-        <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-neutral-900 border-b-4 md:border-b-8 border-neutral-900 inline-block pr-6 md:pr-12 pb-2 md:pb-4 uppercase">{invoice.type}</h1>
+        <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-neutral-900 border-b-4 md:border-b-8 border-neutral-900 inline-block pr-6 md:pr-12 pb-2 md:pb-4 uppercase">{invoice.status === 'paid' ? 'RECEIPT' : invoice.type.toUpperCase()}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
           <div className="space-y-4">
@@ -1101,7 +1156,7 @@ function StudioDarkTemplate({ invoice, profile, currencySymbol }: { invoice: Inv
                 {invoice.status === 'paid' ? 'Total Paid' : 'Grand Total'}
               </span>
               <span className="text-3xl text-neutral-900">
-                {currencySymbol}{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
+                {currencySymbol}{invoice.status === 'paid' ? invoice.totalAmount.toLocaleString() : (invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
               </span>
             </div>
           </div>
@@ -1142,10 +1197,10 @@ function ProDarkTemplate({ invoice, profile, currencySymbol }: { invoice: Invoic
       <div className="absolute bottom-0 left-0 w-[200px] md:w-[300px] h-[200px] md:h-[300px] border border-white/5 rounded-full pointer-events-none" />
 
       <div className="flex flex-col md:flex-row justify-between items-center relative z-10 gap-8">
-        <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase opacity-80 select-none">{invoice.type}</h1>
+        <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase opacity-80 select-none">{invoice.status === 'paid' ? 'RECEIPT' : invoice.type.toUpperCase()}</h1>
         <div className="text-center md:text-right space-y-1 opacity-60 font-mono text-xs md:text-sm">
           <p>Date: {format(new Date(), 'dd / MM / yyyy')}</p>
-          <p className="break-all">Invoice ID: {invoice.invoiceNumber}</p>
+          <p className="break-all">{invoice.status === 'paid' ? 'Receipt' : 'Invoice'} ID: {invoice.invoiceNumber}</p>
         </div>
       </div>
 
@@ -1215,7 +1270,7 @@ function ProDarkTemplate({ invoice, profile, currencySymbol }: { invoice: Invoic
                 {invoice.status === 'paid' ? 'Total Paid' : 'Total Due'}
               </span>
               <span className="text-4xl tabular-nums italic">
-                {currencySymbol}{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
+                {currencySymbol}{invoice.status === 'paid' ? invoice.totalAmount.toLocaleString() : (invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}
               </span>
             </div>
           </div>
@@ -1244,6 +1299,157 @@ function ProDarkTemplate({ invoice, profile, currencySymbol }: { invoice: Invoic
 }
 
 // --- Helper UI Components ---
+
+function ExecutiveGoldTemplate({ invoice, profile, currencySymbol }: { invoice: Invoice, profile: UserProfile | null, currencySymbol: string }) {
+  return (
+    <div id="invoice-content" className="bg-white min-h-[1123px] w-full p-8 md:p-16 relative overflow-hidden font-sans text-slate-900">
+      {/* Header Bar */}
+      <div className="absolute top-0 left-0 w-full h-4 bg-[#002147]" />
+      
+      {/* Top Section */}
+      <div className="flex justify-between items-start mb-16 pt-8">
+        <div className="space-y-6">
+          <LogoArea profile={profile} />
+          <div className="space-y-1">
+            <h1 className="text-4xl font-extrabold tracking-tight text-[#002147] uppercase">{invoice.status === 'paid' ? 'Receipt' : 'Invoice'}</h1>
+            <p className="text-slate-500 font-medium">#{invoice.invoiceNumber}</p>
+          </div>
+        </div>
+        
+        <div className="text-right space-y-6">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-[#B8860B] uppercase tracking-wider">Date Issued</p>
+            <p className="font-semibold">{format(toDate(invoice.date), 'MMM dd, yyyy')}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-[#B8860B] uppercase tracking-wider">Due Date</p>
+            <p className="font-semibold">{format(toDate(invoice.dueDate), 'MMM dd, yyyy')}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-12 mb-16">
+        <div className="space-y-4">
+          <div className="bg-[#002147] py-2 px-4 inline-block">
+            <h2 className="text-xs font-bold text-white uppercase tracking-widest">Billed From</h2>
+          </div>
+          <div className="px-1 space-y-1">
+            <p className="font-bold text-lg">{profile?.businessName || 'Business Name'}</p>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-[280px]">{profile?.businessAddress}</p>
+            <p className="text-sm text-slate-600">{profile?.businessEmail}</p>
+            <p className="text-sm text-slate-600">{profile?.businessPhone}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4 text-right">
+          <div className="bg-[#002147] py-2 px-4 inline-block ml-auto">
+            <h2 className="text-xs font-bold text-white uppercase tracking-widest">Billed To</h2>
+          </div>
+          <div className="px-1 space-y-1">
+            <p className="font-bold text-lg">{invoice.customerName}</p>
+            <p className="text-sm text-slate-600 leading-relaxed ml-auto max-w-[280px]">{invoice.customerAddress}</p>
+            {invoice.customerEmail && <p className="text-sm text-slate-600">{invoice.customerEmail}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Items Table */}
+      <div className="mb-12">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-[#002147] text-white">
+              <th className="py-4 px-6 text-left text-xs font-bold uppercase tracking-wider rounded-tl-lg">Description</th>
+              <th className="py-4 px-6 text-center text-xs font-bold uppercase tracking-wider">Qty</th>
+              <th className="py-4 px-6 text-right text-xs font-bold uppercase tracking-wider">Price</th>
+              <th className="py-4 px-6 text-right text-xs font-bold uppercase tracking-wider rounded-tr-lg">Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 border-x border-b border-slate-100">
+            {invoice.items.map((item, index) => (
+              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                <td className="py-6 px-6 font-medium text-slate-800">
+                  <p className="font-bold">{item.description}</p>
+                </td>
+                <td className="py-6 px-6 text-center text-slate-600 font-mono italic">{item.quantity}</td>
+                <td className="py-6 px-6 text-right text-slate-600 font-mono italic">{currencySymbol}{item.unitPrice.toLocaleString()}</td>
+                <td className="py-6 px-6 text-right font-bold text-slate-900 font-mono">{currencySymbol}{item.total.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Summary Section */}
+      <div className="flex justify-between items-start pt-8">
+        <div className="w-1/2 space-y-6">
+          <div className="space-y-2">
+            <p className="text-xs font-bold text-[#B8860B] uppercase tracking-wider">Payment Information</p>
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Bank Name:</span>
+                <span className="font-semibold text-slate-700">{profile?.bankName || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Account Name:</span>
+                <span className="font-semibold text-slate-700">{profile?.accountName || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Account No:</span>
+                <span className="font-mono font-semibold text-slate-700">{profile?.accountNumber || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <p className="text-xs font-bold text-[#B8860B] uppercase tracking-wider">Notes</p>
+            <p className="text-xs text-slate-500 leading-relaxed italic">
+              {invoice.notes || 'Thank you for your business. Please ensure payment is made by the due date specified.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="w-1/3 space-y-3">
+          <div className="flex justify-between items-center py-2 border-b border-slate-100">
+            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Subtotal</span>
+            <span className="text-lg font-bold text-slate-700 font-mono">{currencySymbol}{invoice.subtotal.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b border-slate-100">
+            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Tax ({invoice.taxRate}%)</span>
+            <span className="text-lg font-bold text-slate-700 font-mono">{currencySymbol}{invoice.taxAmount.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center py-4 bg-[#002147] px-4 rounded-lg shadow-lg">
+            <span className="text-white font-bold uppercase tracking-widest text-xs">Total Amount</span>
+            <span className="text-2xl font-black text-[#B8860B] font-mono italic">{currencySymbol}{invoice.totalAmount.toLocaleString()}</span>
+          </div>
+          {invoice.paidAmount > 0 && (
+            <div className="flex justify-between items-center py-2 px-4 text-green-600 font-bold border border-green-100 rounded-lg">
+              <span className="text-xs uppercase tracking-wider">Amount Paid</span>
+              <span className="font-mono">-{currencySymbol}{invoice.paidAmount.toLocaleString()}</span>
+            </div>
+          )}
+          {invoice.status !== 'paid' && (
+            <div className="pt-2">
+              <div className="flex justify-between items-center px-4">
+                <span className="text-sm font-black text-[#002147] uppercase tracking-widest">Balance Due</span>
+                <span className="text-2xl font-black text-[#002147] font-mono">{currencySymbol}{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString()}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer Branding */}
+      <div className="absolute bottom-16 left-16 right-16 flex justify-between items-center border-t border-slate-100 pt-8 opacity-50">
+        <p className="text-[10px] font-bold uppercase tracking-[.3em]">Generated by Lumina Invoice</p>
+        <p className="text-[10px] font-bold uppercase tracking-[.3em]">Thank You</p>
+      </div>
+
+      {/* Gold Accent Corner */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#B8860B] -mr-16 -mt-16 rotate-45 opacity-10" />
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#B8860B] -ml-16 -mb-16 rotate-45 opacity-10" />
+    </div>
+  );
+}
 
 function LogoArea({ profile, minimal = false }: { profile: UserProfile | null, minimal?: boolean }) {
   if (profile?.logoUrl) {

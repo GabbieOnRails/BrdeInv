@@ -3,17 +3,9 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Workaround for libraries attempting to overwrite fetch
-try {
-  let _fetch = window.fetch;
-  Object.defineProperty(window, 'fetch', {
-    get: () => _fetch,
-    set: (v) => { _fetch = v; },
-    configurable: true,
-    enumerable: true
-  });
-} catch (e) {
-  // Ignore errors if window.fetch is not configurable
+// Global process polyfill
+if (typeof (window as any).process === 'undefined') {
+  (window as any).process = { env: {} };
 }
 
 if (typeof (window as any).global === 'undefined') {
@@ -41,11 +33,6 @@ if (typeof (window as any).global === 'undefined') {
       return prop in globalStore || prop in target;
     }
   });
-}
-
-// Global process polyfill
-if (typeof (window as any).process === 'undefined') {
-  (window as any).process = { env: {} };
 }
 
 createRoot(document.getElementById('root')!).render(
